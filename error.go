@@ -4,11 +4,10 @@ import (
 	"bytes"
 	//"encoding/binary"
 	"fmt"
+	"github.com/slclub/utils/bytesconv"
 	"io"
-	"reflect"
 	"strconv"
 	"sync"
-	"unsafe"
 )
 
 /**
@@ -89,7 +88,7 @@ func Errorf(format string, args ...interface{}) string {
 
 func (err *gerror) Error() string {
 	//return ""
-	return BytesToString(err.mem.Bytes())
+	return bytesconv.BytesToString(err.mem.Bytes())
 }
 
 func (err *gerror) Reset() {
@@ -112,6 +111,7 @@ func (err *gerror) GetCode() int {
 func (err *gerror) SetCode(code int) {
 	err.code = code
 
+	//str := strconv.FormatInt(int64(code), 10)
 	str := strconv.Itoa(code)
 
 	if err.mem == nil {
@@ -232,14 +232,14 @@ func test_r(args ...interface{}) string {
 //}
 
 // StringToBytes converts string to byte slice without a memory allocation.
-func StringToBytes(s string) (b []byte) {
-	sh := *(*reflect.StringHeader)(unsafe.Pointer(&s))
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	bh.Data, bh.Len, bh.Cap = sh.Data, sh.Len, sh.Len
-	return b
-}
-
-// BytesToString converts byte slice to string without a memory allocation.
-func BytesToString(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
+//func StringToBytes(s string) (b []byte) {
+//	sh := *(*reflect.StringHeader)(unsafe.Pointer(&s))
+//	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+//	bh.Data, bh.Len, bh.Cap = sh.Data, sh.Len, sh.Len
+//	return b
+//}
+//
+//// BytesToString converts byte slice to string without a memory allocation.
+//func BytesToString(b []byte) string {
+//	return *(*string)(unsafe.Pointer(&b))
+//}

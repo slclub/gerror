@@ -8,7 +8,7 @@ func Benchmark_Error(B *testing.B) {
 	B.ReportAllocs()
 	B.ResetTimer()
 	for i := 0; i < B.N; i++ {
-		Error(-1002, "ddfdfdfdfd", "haodddfd")
+		Error(-23232, "ddfdfdfdfd", "haodddfd")
 	}
 }
 
