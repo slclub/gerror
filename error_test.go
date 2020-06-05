@@ -1,6 +1,7 @@
 package gerror
 
 import (
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -61,6 +62,42 @@ func TestAcceptStruct(t *testing.T) {
 func TestEmpty(t *testing.T) {
 	New()
 	test_r(3234, 'a', "want a good work! hard !", []byte("now you cand do better"))
+}
+
+func TestStackError(t *testing.T) {
+	// StackError
+	stack_err := NewStackError()
+	ret := stack_err.Push(errors.New("first error"))
+	assert.True(t, ret)
+	fmt.Println(stack_err[0])
+	ret = stack_err.Push(errors.New("second error"))
+	assert.Equal(t, 2, stack_err.Size())
+
+	err, _ := stack_err.Pop()
+	assert.Equal(t, 1, stack_err.Size())
+
+	fmt.Println(err)
+	fmt.Println(stack_err[0])
+
+	// nil test
+
+	ret = stack_err.Push(nil)
+	assert.Equal(t, 1, stack_err.Size())
+	err, _ = stack_err.Pop()
+	err, _ = stack_err.Pop()
+
+	// StackGerror
+	stack_gerr := NewStackGerror()
+	ret = stack_gerr.Push(New("first gerror"))
+	assert.True(t, ret)
+	ret = stack_gerr.Push(New("second gerror"))
+	assert.Equal(t, 2, stack_gerr.Size())
+	err, _ = stack_gerr.Pop()
+	fmt.Println("Stack Gerror", err)
+	stack_gerr.Push(nil)
+	assert.Equal(t, 1, stack_gerr.Size())
+	stack_gerr.Pop()
+	stack_gerr.Pop()
 }
 
 type strings_stu struct {

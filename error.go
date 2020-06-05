@@ -27,10 +27,27 @@ const (
 	CONST_ERRNO_PANIC = -100000
 )
 
+type IGerror interface {
+	error
+	ToString
+	io.Writer
+
+	Reset()
+	W(args ...interface{})
+	Size() int
+	ErrorBytes() []byte
+
+	GetCode() int
+	SetCode(int)
+}
+
+var _ IGerror = &gerror{}
+
 type ToString interface {
 	String() string
 }
 
+// ******************************* gerror********************************
 type gerror struct {
 	code int
 	mem  *bytes.Buffer //[]byte
@@ -219,6 +236,71 @@ func test_r(args ...interface{}) string {
 	}
 	return str
 }
+
+// ******************************* gerror********************************
+
+// ****************************stack gerror******************************
+
+// slice no need to poniter
+type StackGerror []IGerror
+
+func NewStackGerror() StackGerror {
+	return make(StackGerror, 0)
+}
+func (sg *StackGerror) Push(err IGerror) bool {
+	if err == nil {
+		return false
+	}
+	*sg = append(*sg, err)
+	return true
+}
+
+func (sg *StackGerror) Pop() (IGerror, bool) {
+	ln := len(*sg)
+	if ln == 0 {
+		return nil, false
+	}
+	rtn := (*sg)[ln-1]
+	*sg = (*sg)[:ln-1]
+	return rtn, true
+}
+
+func (sg *StackGerror) Size() int {
+	return len(*sg)
+}
+
+// ****************************stack gerror******************************
+// ****************************stack  error******************************
+
+type StackError []error
+
+func NewStackError() StackError {
+	return make(StackError, 0)
+}
+
+func (se *StackError) Push(err error) bool {
+	if err == nil {
+		return false
+	}
+	*se = append(*se, err)
+	return true
+}
+
+func (se *StackError) Pop() (error, bool) {
+	ln := len(*se)
+	if ln == 0 {
+		return nil, false
+	}
+	rtn := (*se)[ln-1]
+	*se = (*se)[:ln-1]
+	return rtn, true
+}
+
+func (se *StackError) Size() int {
+	return len(*se)
+}
+
+// ****************************stack  error******************************
 
 // ======================utile ===========================
 //func Int32ToBytes(i int) []byte {
